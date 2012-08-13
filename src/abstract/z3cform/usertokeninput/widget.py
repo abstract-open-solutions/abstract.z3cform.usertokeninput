@@ -1,9 +1,11 @@
+import json
 import zope.component
 import zope.interface
 import zope.schema
 
 from z3c.form import interfaces
 from z3c.form import widget
+from Products.CMFCore.utils import getToolByName
 
 from collective.z3cform.widgets.token_input_widget import TokenInputWidget
 from .interfaces import IUserTokenInputWidget
@@ -12,43 +14,47 @@ from .interfaces import IUserTokenInputWidget
 class UserTokenInputWidget(TokenInputWidget):
     zope.interface.implementsOnly(IUserTokenInputWidget)
 
-    # js_template = """\
-    # (function($) {
-    #     $().ready(function() {
-    #         $('#%(id)s').data('klass','%(klass)s');
-    #         keywordTokenInputActivate('%(id)s', newValues, oldValues);
-    #     });
-    # })(jQuery);
-    # """
+    js_template = """\
+    (function($) {
+        $().ready(function() {
+            $("#%(id)s").tokenInput(
+              "%(path)s",
+              {theme: "facebook",
+               preventDuplicates: true,
+               prePopulate: %(values)s,
+               tokenDelimiter: "\\n"
+              }
+            );
+        });
+    })(jQuery);
+    """
 
-    # def js(self):
-    #     # $("#my-text-input").tokenInput("/url/to/your/script/");
-    #     values = self.context.portal_catalog.uniqueValuesFor('Subject')
-    #     old_values = self.context.Subject()
-    #     tags = ""
-    #     old_tags = ""
-    #     index = 0
-    #     for index, value in enumerate(values):
-    #         tags += "{id: '%s', name: '%s'}" % (value.replace("'", "\\'"), value.replace("'", "\\'"))
-    #         if index < len(values) - 1:
-    #             tags += ", "
-    #     old_index = 0
-    #     #prepopulate
-    #     for index, value in enumerate(old_values):
-    #         old_tags += u"{id: '%s', name: '%s'}" % (value.replace("'", "\\'"), value.replace("'", "\\'"))
-    #         if index < len(old_values) - 1:
-    #             old_tags += ", "
-    #     result = self.js_template % dict(id=self.id,
-    #         klass=self.klass,
-    #         newtags=unicode(tags, errors='ignore'),
-    #         oldtags=old_tags)
-    #     return result
+    def widget_values(self):
+        pm = getToolByName(self.context, 'portal_membership')
+        values = getattr(self.context, self.field.getName(), [])
+        results = []
+        for user_id in values:
+            usr = pm.getMemberById(user_id)
+            if not usr:
+                continue
+            results.append({
+                    'id': user_id,
+                    'name': usr.getProperty('fullname') or user_id
+            })
 
-    # def render(self):
-    #     if self.mode == interfaces.DISPLAY_MODE:
-    #         return self.display_template(self)
-    #     else:
-    #         return self.input_template(self)
+        return json.dumps(results)
+
+    def js(self):
+        view_url = "%s/++widget++%s/users_search" % (
+                self.request.getURL(),
+                self.field.getName())
+
+        return self.js_template % dict(
+            id=self.id,
+            path=view_url,
+            values=self.widget_values()
+        )
+
 
 
 @zope.interface.implementer(interfaces.IFieldWidget)

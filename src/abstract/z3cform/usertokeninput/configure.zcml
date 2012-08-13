@@ -1,24 +1,33 @@
-<configure xmlns="http://namespaces.zope.org/zope"
-           xmlns:i18n="http://namespaces.zope.org/i18n"
-           xmlns:gs="http://namespaces.zope.org/genericsetup"
-           i18n_domain="abstract.z3cform.usertokeninput">
+<configure
+    xmlns="http://namespaces.zope.org/zope"
+    xmlns:i18n="http://namespaces.zope.org/i18n"
+    xmlns:gs="http://namespaces.zope.org/genericsetup"
+    xmlns:browser="http://namespaces.zope.org/browser"
+    i18n_domain="abstract.z3cform.usertokeninput">
 
   <includeDependencies package="." />
 
   <gs:registerProfile
-      name="default"
-      title="User Token widget"
-      directory="profiles/default"
-      description="User token widget based  on collective.z3cform.widget TokenInputWidget"
-      provides="Products.GenericSetup.interfaces.EXTENSION"
-      />
+    name="default"
+    title="User Token widget"
+    directory="profiles/default"
+    description="User token widget based  on collective.z3cform.widget TokenInputWidget"
+    provides="Products.GenericSetup.interfaces.EXTENSION"
+  />
 
   <class class=".widget.UserTokenInputWidget">
-      <require
-          permission="zope.Public"
-          interface=".interfaces.IUserTokenInputWidget"
-      />
+    <require
+      permission="zope.Public"
+      interface=".interfaces.IUserTokenInputWidget"
+    />
   </class>
 
+  <browser:page
+    for=".interfaces.IUserTokenInputWidget"
+    name="users_search"
+    class=".browser.users_search"
+    permission="zope2.View"
+  />
 
+<!-- layer=".interfaces.IThemeSpecific" -->
 </configure>
