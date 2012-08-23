@@ -45,16 +45,14 @@ class UserTokenInputWidget(TokenInputWidget):
         return json.dumps(results)
 
     def js(self):
-        view_url = "%s/++widget++%s/users_search" % (
-                self.request.getURL(),
-                self.field.getName())
+        pt = self.context.restrictedTraverse('plone_portal_state')
+        view_url = "%s/users_search" % pt.portal_url()
 
         return self.js_template % dict(
             id=self.id,
             path=view_url,
             values=self.widget_values()
         )
-
 
 
 @zope.interface.implementer(interfaces.IFieldWidget)

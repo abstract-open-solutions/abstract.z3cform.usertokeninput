@@ -23,11 +23,10 @@
   </class>
 
   <browser:page
-    for=".interfaces.IUserTokenInputWidget"
+    for="Products.CMFPlone.interfaces.siteroot.IPloneSiteRoot"
     name="users_search"
     class=".browser.users_search"
     permission="zope2.View"
   />
 
-<!-- layer=".interfaces.IThemeSpecific" -->
 </configure>
