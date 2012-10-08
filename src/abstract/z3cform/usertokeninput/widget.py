@@ -33,6 +33,8 @@ class UserTokenInputWidget(TokenInputWidget):
         pm = getToolByName(self.context, 'portal_membership')
         values = getattr(self.context, self.field.getName(), [])
         results = []
+        # XXX what if no values there?
+        if values is None: values = []
         for user_id in values:
             usr = pm.getMemberById(user_id)
             if not usr:
